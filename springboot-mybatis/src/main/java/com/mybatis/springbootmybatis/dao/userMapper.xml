@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.springbootmybatis.dao.UserDao">
+
+    <sql id="userProperty">NAME,USERNAME,PHONE_NUMBER,ADDRESS</sql>
+
+    <cache type="com.mybatis.springbootmybatis.cache.MyCache" size="1" flushInterval="10000" />
+
+    <!--<cache flushInterval="10000"/>-->
+    <resultMap id="userMap" type="com.mybatis.springbootmybatis.dto.User">
+        <id column="U_ID" property="id" />
+        <result column="U_USERNAME" property="username"/>
+        <result column="U_NAME" property="name"/>
+        <result column="U_PHONE_NUMBER" property="phoneNumber"/>
+        <result column="U_ADDRESS" property="address"/>
+        <association property="house" javaType="com.mybatis.springbootmybatis.dto.House" >
+            <result column="H_ID" property="id"/>
+            <result column="H_ADDRESS" property="address"/>
+        </association>
+        <collection property="cardList" javaType="java.util.ArrayList" ofType="com.mybatis.springbootmybatis.dto.Card">
+            <result column="C_ID" property="id"/>
+            <result column="C_BRAND" property="brand"/>
+            <result column="C_NAME" property="name"/>
+            <result column="C_VERSION" property="version"/>
+        </collection>
+    </resultMap>
+
+    <insert id="insertUser" parameterType="com.mybatis.springbootmybatis.dto.User">
+        INSERT INTO t_user(<include refid="userProperty"></include>)
+        VALUES (#{user.name},#{user.username},#{user.phoneNumber},#{user.address})
+    </insert>
+
+    <select id="findUserById" flushCache="true" resultMap="userMap">
+        select
+            u.ID AS U_ID,
+            u.NAME AS U_NAME,
+            u.USERNAME AS U_USERNAME,
+            u.ADDRESS AS U_ADDRESS,
+            h.ID AS H_ID ,
+            h.ADDRESS AS H_ADDRESS,
+            c.ID AS C_ID,
+            c.NAME AS C_NAME,
+            c.VERSION AS C_VERSION,
+            c.BRAND AS C_BRAND
+        from t_user u
+        left join t_house h on(u.id = h.user_id)
+        left join t_car c on(u.id = c.user_id)
+        where u.id =#{id}
+    </select>
+
+    <select id="findUser" resultType="com.mybatis.springbootmybatis.dto.User">
+        select * from t_user where id = #{id}
+    </select>
+    <select id="findUser1" resultType="com.mybatis.springbootmybatis.dto.User">
+        select * from t_user where id = #{id}
+    </select>
+
+    <select id="findUserByUsername" resultType="com.mybatis.springbootmybatis.dto.User">
+        select * from t_user where username = #{username}
+    </select>
+
+    <update id="updateUserAddressById">
+        update t_user set ADDRESS = #{address} where id = #{id}
+    </update>
+
+</mapper>
